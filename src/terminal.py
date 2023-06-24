@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import messagebox as MessageBox
 import psycopg2
 
+
+#restricciones para verificar que la entrada de texto sea de tipo entero
 def entrada_id(text, ntext):
     if len(ntext) > 4:
         return False
@@ -15,7 +17,10 @@ def entrada_placa(text):
         return False
     else:
         return text
-    
+#----------------------------------------------------------------------------
+
+
+#Registrar los datos en la base de datos de PostgreSQL    
 def registrar_tiquete(cedulap, idruta):
     if(cedulap=="" or idruta == ""):
         MessageBox.showinfo("ERROR", "Por favor ingresar todos los campos")
@@ -43,7 +48,7 @@ def registrar_ruta(id, salida, destino, horario, idbus):
         cursor = conn.cursor()
         consulta = '''INSERT INTO rutas(idruta, salida, destino, horario, idbus) VALUES (%s, %s, %s, %s, %s)'''
         cursor.execute(consulta, (id, salida, destino, horario, idbus))
-        print("Registro satisfactorio")
+        MessageBox.showinfo("EXITO", "Registro Satisfactorio")
         conn.commit()
         conn.close()
     
@@ -59,7 +64,7 @@ def registrar_bus(id, placa, capacidad, idempleado):
         cursor = conn.cursor()
         consulta = '''INSERT INTO bus (idbus, placa, capacidad, idempleado) VALUES (%s, %s, %s, %s)'''
         cursor.execute(consulta, (id, placa, capacidad, idempleado))
-        print("Registro satisfactorio")
+        MessageBox.showinfo("EXITO", "Registro Satisfactorio")
         conn.commit()
         conn.close()
     
@@ -74,7 +79,7 @@ def registrar_conductor(id, nombre, apellido, telefono, cedula):
         cursor = conn.cursor()
         consulta = '''INSERT INTO empleado (idempleado, nombre, apellido, telefono, cedula) VALUES (%s, %s, %s, %s, %s)'''
         cursor.execute(consulta, (id, nombre, apellido, telefono, cedula))
-        print("Registro satisfactorio")
+        MessageBox.showinfo("EXITO", "Registro Satisfactorio")
         conn.commit()
         conn.close()
     
@@ -94,6 +99,8 @@ def registrar_pasajero(cedula, nombre, apellido, telefono, correo):
         conn.commit()
         conn.close()
         
+
+#Acción de los botones y apertura de las otras ventana
 
 def tiquete_boton():
     tiquete_ventana = Toplevel()
@@ -261,7 +268,7 @@ def conductor_boton():
     label.grid(row=5, column=0)
     label.config(background= "#e2f0cb")
 
-    entry_cedulae = Entry(frame, validate= 'key', validatecommand=(frame.register(entrada_int)))
+    entry_cedulae = Entry(frame, validate= 'key', validatecommand=(frame.register(entrada_int), "%S"))
     entry_cedulae.grid(row = 5, column = 1)
     
     label = Label(frame, text = "Nombre: ")
@@ -289,7 +296,7 @@ def conductor_boton():
     label.grid(row=13, column=0)
     label.config(background= "#e2f0cb")
     
-    entry_ide = Entry(frame, validate='Key', validatecommand=(frame.register(entrada_id)))
+    entry_ide = Entry(frame, validate='key', validatecommand=(frame.register(entrada_id), "%S", "%P"))
     entry_ide.grid(row = 13, column = 1)
     
     r = Button(frame, text='Registrar', command = lambda:registrar_conductor(entry_ide.get(), 
@@ -297,7 +304,7 @@ def conductor_boton():
                                                                             entry_apellidoe.get(), 
                                                                             entry_telefonoe.get(), 
                                                                             entry_cedulae.get()))
-    r.grid(row=55, column=3, sticky=W+E)
+    r.grid(row=500, column=2, sticky=W+E)
     
 def pasajero_boton():
     pasajero_ventana = Toplevel()
@@ -356,11 +363,13 @@ def pasajero_boton():
                                                                             entry_telefonoc.get(), 
                                                                             entry_correoc.get()))
     
-    r.grid(row=55, column=3, sticky=W+E)
+    r.grid(row=500, column=3, sticky=W+E)
     
     pasajero_ventana.mainloop()
 
+#-----------------------------------------------------------------------------------------------------------------------------
 
+#Ventana de inicio
 
 root = Tk()
 root.title("Terminal de Transporte")
