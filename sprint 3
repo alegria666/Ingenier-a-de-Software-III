@@ -1,0 +1,279 @@
+from tkinter import *
+from tkinter import ttk
+import tkinter as tk
+from tkinter import messagebox
+import psycopg2
+
+def mostrar_seleccion(metodo_pago):
+  mensaje = f"Seleccionaste el método de pago: {metodo_pago}\n ¿Desea efectuar el pago?"
+  messagebox.showinfo("Efecuar pago", mensaje)
+
+def seleccion_efectivo():
+  mostrar_seleccion("Efectivo")
+
+def seleccion_transferencia():
+  mostrar_seleccion("Transferencia")
+
+def seleccion_tarjeta():
+  mostrar_seleccion("Tarjeta")
+
+def entrada_id(text, ntext):
+  if len(ntext) > 4:
+    return False
+  return text.isdecimal()
+
+def entrada_int(text):
+  return text.isdecimal()
+
+def entrada_placa(text):
+  if len(text) > 7:
+    return False
+  else:
+    return text
+
+def registrar_tiquete(cedulap, idruta):
+  if(cedulap=="" or idruta == ""):
+    messagebox.showinfo("ERROR", "Por favor ingresar todos los campos")
+  else:
+    conn = psycopg2.connect(dbname = "terminal_transporte", 
+                            user  = "postgres", 
+                            password = "5432", 
+                            host = "localhost")
+    cursor = conn.cursor()
+    consulta = '''INSERT INTO abordajes(id_cedula, idruta) VALUES (%s, %s)'''
+    cursor.execute(consulta, (cedulap, idruta))
+    messagebox.showinfo("EXITO", "Registro Satisfactorio")
+    conn.commit()
+    conn.close()
+    
+def registrar_ruta(id, salida, destino):
+  if(id=="" or salida == "" or destino == "" ):
+    messagebox.showinfo("ERROR", "Por favor ingresar todos los campos")
+  else:
+    conn = psycopg2.connect(dbname = "terminal_transporte", 
+                            user  = "postgres", 
+                            password = "5432", 
+                            host = "localhost")
+    cursor = conn.cursor()
+    consulta = '''INSERT INTO rutas(idruta, salida, destino) VALUES (%s, %s, %s)'''
+    cursor.execute(consulta, (id, salida, destino))
+    print("Registro satisfactorio")
+    conn.commit()
+    conn.close()
+       
+def registrar_bus(id, placa, capacidad, idempleado):
+  if(id=="" or placa == "" or capacidad == "" or idempleado == ""):
+    messagebox.showinfo("ERROR", "Por favor ingresar todos los campos")
+  else:
+    conn = psycopg2.connect(dbname = "terminal_transporte", 
+                            user  = "postgres", 
+                            password = "5432", 
+                            host = "localhost")
+    cursor = conn.cursor()
+    consulta = '''INSERT INTO bus (idbus, placa, capacidad, idempleado) VALUES (%s, %s, %s, %s)'''
+    cursor.execute(consulta, (id, placa, capacidad, idempleado))
+    print("Registro satisfactorio")
+    conn.commit()
+    conn.close()
+    
+def registrar_conductor(id, nombre, apellido, telefono, cedula):
+  if(id=="" or nombre == "" or apellido == "" or telefono == "" or cedula ==""):
+    messagebox.showinfo("ERROR", "Por favor ingresar todos los campos")
+  else:
+    conn = psycopg2.connect(dbname = "terminal_transporte", 
+                            user  = "postgres", 
+                            password = "5432", 
+                            host = "localhost")
+    cursor = conn.cursor()
+    consulta = '''INSERT INTO empleado (idempleado, nombre, apellido, telefono, cedula) VALUES (%s, %s, %s, %s, %s)'''
+    cursor.execute(consulta, (id, nombre, apellido, telefono, cedula))
+    print("Registro satisfactorio")
+    conn.commit()
+    conn.close()
+    
+def registrar_compra(id_cedula, idempleado, idbus, idruta,valor):   
+  if(id_cedula=="" or idempleado == "" or idbus == "" or idruta == ""or valor=="" ):
+    messagebox.showinfo("ERROR", "Por favor ingresar todos los campos")
+  else:
+    conn = psycopg2.connect(dbname = "terminal_transporte", 
+                            user  = "postgres", 
+                            password = "5432", 
+                            host = "localhost")
+    cursor = conn.cursor()
+    consulta = '''INSERT INTO venta_tiquete (id_cedula, idempleado, idbus, idruta,valor) VALUES (%s, %s, %s, %s,%s)'''
+    cursor.execute(consulta, (id_cedula, idempleado,idbus,idruta,valor))
+    print("Registro satisfactorio")
+    print(id_cedula,idempleado,idbus,idruta,valor)
+        
+    messagebox.showinfo("EXITO", "Registro Satisfactorio\nvalor: ") 
+               
+    conn.commit()
+    conn.close()       
+           
+def registrar_pasajero(cedula, nombre, apellido, telefono, correo):   
+  if(cedula=="" or nombre == "" or apellido == "" or telefono == "" or correo ==""):
+    messagebox.showinfo("ERROR", "Por favor ingresar todos los campos")
+  else:
+    conn = psycopg2.connect(dbname = "terminal_transporte", 
+                            user  = "postgres", 
+                            password = "5432", 
+                            host = "localhost")
+    cursor = conn.cursor()
+    consulta = '''INSERT INTO cliente (id_cedula, nombre, apellido, telefono, correo) VALUES (%s, %s, %s, %s, %s)'''
+    cursor.execute(consulta, (cedula, nombre, apellido, telefono, correo))
+    messagebox.showinfo("EXITO", "Registro Satisfactorio")        
+    conn.commit()
+    conn.close()
+             
+
+
+    # Aquí puedes crear una interfaz para ingresar los datos a modificar
+    # y luego implementar la lógica para actualizar los datos en la base de datos.
+
+def eliminar():
+    ventana_eliminar = Toplevel(root)
+    ventana_eliminar.title("Eliminar Registro")
+    ventana_eliminar.geometry("300x150")
+
+    label = Label(ventana_eliminar, text="Ingrese ID del registro a eliminar:")
+    label.pack(pady=10)
+
+    id_entry = Entry(ventana_eliminar)
+    id_entry.pack()
+
+    eliminar_btn = Button(ventana_eliminar, text="Eliminar", command=lambda: eliminar_registro(id_entry.get()))
+    eliminar_btn.pack(pady=10)
+
+def eliminar_registro(id_registro):
+    if id_registro:
+        try:
+            conn = psycopg2.connect(dbname="terminal_transporte", user="postgres", password="5432", host="localhost")
+            cursor = conn.cursor()
+
+            # Aquí ejecuta la consulta SQL para eliminar el registro con el ID proporcionado
+            consulta = "DELETE FROM cliente WHERE id_cedula = %s"  # Reemplaza 'tabla' con el nombre de la tabla adecuado
+            cursor.execute(consulta, (id_registro,))
+
+            conn.commit()
+            conn.close()
+
+            messagebox.showinfo("Éxito", "Registro eliminado exitosamente.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al eliminar el registro: {str(e)}")
+            
+
+
+
+# Esta función muestra los datos en campos de entrada para su modificación
+
+
+def modificar():
+    ventana_modificar = Toplevel(root)
+    ventana_modificar.title("Modificar Registro")
+    ventana_modificar.geometry("300x200")
+
+    label = Label(ventana_modificar, text="Ingrese ID de cédula:")
+    label.pack(pady=10)
+
+    id_entry = Entry(ventana_modificar)
+    id_entry.pack()
+
+    buscar_btn = Button(ventana_modificar, text="Buscar", command=lambda: mostrar_datos(id_entry.get(), ventana_modificar))
+    buscar_btn.pack(pady=10)
+
+def mostrar_datos(id_cedula, ventana_modificar):
+    registro = buscar_registro(id_cedula)
+    if registro:
+        campos = ["nombre", "apellido", "telefono", "correo"]
+        entries = {}
+
+        for idx, campo in enumerate(campos):
+            label = Label(ventana_modificar, text=campo.capitalize())
+            label.pack()
+
+            entry = Entry(ventana_modificar)
+            entry.insert(0, registro[idx + 1])  # Saltamos el ID de cédula en la tupla
+            entry.pack()
+
+            entries[campo] = entry
+
+        modificar_btn = Button(ventana_modificar, text="Modificar", command=lambda: aplicar_modificacion(id_cedula, entries))
+        modificar_btn.pack(pady=10)
+
+
+
+
+
+
+
+# Esta función aplica las modificaciones en la base de datos
+def aplicar_modificacion(id_cedula, entries):
+    try:
+        conn = psycopg2.connect(dbname="terminal_transporte", user="postgres", password="5432", host="localhost")
+        cursor = conn.cursor()
+
+        campos = ["nombre", "apellido", "telefono", "correo"]
+        valores = [entries[campo].get() for campo in campos]
+
+        consulta = "UPDATE cliente SET nombre=%s, apellido=%s, telefono=%s, correo=%s WHERE id_cedula=%s"
+        cursor.execute(consulta, (*valores, id_cedula))
+
+        conn.commit()
+        conn.close()
+
+        messagebox.showinfo("Éxito", "Modificación exitosa")
+        #ventana_modificar.destroy()
+    except Exception as e:
+        messagebox.showerror("Error", f"Error al modificar el registro: {str(e)}")
+
+def buscar_registro(id_cedula):
+    try:
+        conn = psycopg2.connect(dbname="terminal_transporte", user="postgres", password="5432", host="localhost")
+        cursor = conn.cursor()
+
+        consulta = "SELECT * FROM cliente WHERE id_cedula = %s"
+        cursor.execute(consulta, (id_cedula,))
+        registro = cursor.fetchone()
+
+        conn.close()
+
+        return registro
+    except Exception as e:
+        messagebox.showerror("Error", f"Error al buscar el registro: {str(e)}")
+        return None
+
+
+
+  
+root = Tk()
+menu = ttk.Style()
+menu = tk.Menu(root)
+root.config(menu=menu)
+root.title("Terminal de Transporte")
+root.geometry("400x250")
+canvas = Canvas(root, height = 400, width = 250)
+canvas.pack()
+
+framep = Frame() 
+framep.place(relx=0, rely=0, relheight=1, relwidth=1)
+
+image = PhotoImage(file = "bus.png")
+label = Label(framep, image=image)
+label.place(relheight=1, relwidth=1)
+registros_submenu = tk.Menu(menu)
+ventaTicket_submenu = tk.Menu(menu)
+menu.add_cascade(label="Registros", menu=registros_submenu)
+menu.add_cascade(label="Venta", menu=ventaTicket_submenu)
+# registros_submenu.add_command(label="Pasajeros", command=lambda: pasajero_boton())
+# registros_submenu.add_command(label="Conductores", command=lambda: conductor_boton())
+# registros_submenu.add_command(label="Rutas", command=lambda: ruta_boton())
+# registros_submenu.add_command(label="Buses", command=lambda: bus_boton())
+# ventaTicket_submenu.add_command(label="Vender Ticket", command=lambda: venta_tiquete())
+
+modificar_btn = Button(framep, text="Modificar", command=modificar) 
+modificar_btn.grid(row=15, column=0)
+
+eliminar_btn = Button(framep, text="Eliminar", command=eliminar)
+eliminar_btn.grid(row=15, column=1)
+
+root.mainloop()
